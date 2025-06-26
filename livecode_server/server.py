@@ -29,8 +29,26 @@ class LiveCode(WebSocketEndpoint):
     encoding = 'json'
 
     async def on_connect(self, ws):
-        await ws.accept()
-        await ws.send_json({"msgtype": "welcome", "message": "welcome to livecode"})
+        origin = ws.headers.get("origin", "")
+        if not origin.startswith("http"):
+            await ws.close()
+            return
+
+        try:
+            async with httpx.AsyncClient(timeout=3) as client:
+                response = await client.get(origin)
+                
+            server_header = response.headers.get("server", "")
+            if "Frappe Cloud" in server_header:
+                await ws.accept()
+                await ws.send_json({"msgtype": "welcome", "message": "welcome to livecode"})
+            else:
+                print(f"Rejected origin {origin}, server header: {server_header}")
+                await ws.close()
+
+        except Exception as e:
+            print(f"Error validating origin {origin}: {e}")
+            await ws.close()
 
     async def on_receive(self, ws, msg):
         """This function is called whenever a message is received from the client.
