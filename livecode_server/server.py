@@ -30,6 +30,7 @@ class LiveCode(WebSocketEndpoint):
 
     async def on_connect(self, ws):
         origin = ws.headers.get("origin", "")
+        print(f"Incoming origin: {origin}", flush=True)
         if not origin.startswith("http"):
             await ws.close()
             return
@@ -43,11 +44,11 @@ class LiveCode(WebSocketEndpoint):
                 await ws.accept()
                 await ws.send_json({"msgtype": "welcome", "message": "welcome to livecode"})
             else:
-                print(f"Rejected origin {origin}, server header: {server_header}")
+                print(f"Rejected origin {origin}, server header: {server_header}", flush=True)
                 await ws.close()
 
         except Exception as e:
-            print(f"Error validating origin {origin}: {e}")
+            print(f"Error validating origin {origin}: {e}", flush=True)
             await ws.close()
 
     async def on_receive(self, ws, msg):
