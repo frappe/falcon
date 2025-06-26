@@ -31,7 +31,11 @@ class LiveCode(WebSocketEndpoint):
     async def on_connect(self, ws):
         origin = ws.headers.get("origin", "")
         print(f"Incoming origin: {origin}", flush=True)
-        if not origin.startswith("http"):
+        if ":8000" in origin or ":8080" in origin or "falcon.frappe.io" in origin:
+            await ws.accept()
+            await ws.send_json({"msgtype": "welcome", "message": "welcome to livecode"})
+            return
+        elif not origin.startswith("http"):
             await ws.close()
             return
 
