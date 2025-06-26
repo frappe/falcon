@@ -12,7 +12,7 @@ from starlette.middleware.cors import CORSMiddleware
 import json
 import time
 import shlex
-
+import httpx
 from .kernel import Kernel
 from .utils import templates_dir, static_dir, codemirror_dir
 from .msgtypes import ExecMessage
